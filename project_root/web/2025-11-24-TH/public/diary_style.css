@@ -59,7 +59,7 @@ body {
 .diary-input {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .diary-title-input {
@@ -77,6 +77,49 @@ body {
     border-color: #a78bfa;
 }
 
+/* ✅ 내용 헤더 + 뷰 토글 */
+.diary-view-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.diary-view-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* ✅ 옵시디언 스타일 토글 */
+.view-toggle {
+    display: inline-flex;
+    border-radius: 999px;
+    background: #f3f4ff;
+    padding: 2px;
+    border: 1px solid #e5e7eb;
+    gap: 2px;
+}
+
+.toggle-btn {
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.toggle-btn.active {
+    background: #ffffff;
+    color: #7c3aed;
+}
+
+/* 텍스트 입력 */
 textarea {
     width: 100%;
     min-height: 260px;
@@ -87,6 +130,70 @@ textarea {
     box-sizing: border-box;
     resize: vertical;
     outline: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* ✅ 렌더링 영역 */
+.diary-rendered {
+    display: none;
+    /* 기본은 마크다운 모드 */
+    width: 100%;
+    min-height: 260px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    background: #f9fafb;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+
+/* 렌더링된 마크다운 기본 스타일 */
+.diary-rendered h1,
+.diary-rendered h2,
+.diary-rendered h3 {
+    margin-top: 0.8em;
+    margin-bottom: 0.4em;
+    font-weight: 700;
+}
+
+.diary-rendered h1 {
+    font-size: 1.5rem;
+}
+
+.diary-rendered h2 {
+    font-size: 1.25rem;
+}
+
+.diary-rendered h3 {
+    font-size: 1.1rem;
+}
+
+.diary-rendered p {
+    margin: 0.2em 0 0.6em;
+}
+
+.diary-rendered ul,
+.diary-rendered ol {
+    padding-left: 1.2rem;
+    margin: 0.2em 0 0.6em;
+}
+
+.diary-rendered code {
+    font-family: inherit;
+    font-size: 0.95em;
+    background: #f3f4ff;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.diary-rendered pre code {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #111827;
+    color: #e5e7eb;
 }
 
 /* 버튼 */
@@ -121,8 +228,8 @@ textarea {
     background: #8b5cf6;
 }
 
+/* 초기화 버튼 */
 .btn-reset {
-    /* 초기화 버튼*/
     font-size: 12px;
     font-weight: normal;
     padding: 3px 10px;

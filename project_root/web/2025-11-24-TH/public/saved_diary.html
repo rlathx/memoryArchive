@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Memory Archive | 일기 보기</title>
     <link rel="stylesheet" href="saved_diary_style.css" />
+    <!-- ✅ 마크다운 렌더링용 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -35,6 +37,13 @@
             <h2 class="entry-title" id="entryTitle"></h2>
             <div class="entry-body" id="entryBody"></div>
         </article>
+
+        <!-- 오늘의 한 줄 요약 -->
+        <section class="summary-section">
+            <h3>오늘의 한 줄 요약 ✨</h3>
+            <p id="summaryText"></p>
+        </section>
+
         <!-- 작년 오늘의 나 보기 -->
         <section class="lastyear-section">
             <h3>작년 오늘의 나 보기 📅</h3>
@@ -53,6 +62,7 @@
             <div class="lastyear-empty" id="lastyearEmpty">
                 <div class="emoji">📭</div>
                 <p class="empty-text">작년 오늘의 기록이 없어요!</p>
+                <p class="empty-subtext">올해부터 차곡차곡 쌓아볼까요?</p>
             </div>
         </section>
         <!-- 버튼 -->

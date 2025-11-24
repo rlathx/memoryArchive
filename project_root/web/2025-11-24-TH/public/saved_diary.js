@@ -27,17 +27,25 @@ window.onload = () => {
     document.getElementById('metaWeather').textContent = weather || '—';
 
     // 본문 표시
+    const entryTitleEl = document.getElementById('entryTitle');
+    const entryBodyEl = document.getElementById('entryBody');
+
     if (title) {
-        document.getElementById('entryTitle').textContent = title;
-        document.getElementById('entryTitle').style.display = 'block';
+        entryTitleEl.textContent = title;
+        entryTitleEl.style.display = 'block';
     } else {
-        document.getElementById('entryTitle').style.display = 'none';
+        entryTitleEl.style.display = 'none';
     }
 
     if (note) {
-        document.getElementById('entryBody').textContent = note;
+        // ✅ 마크다운을 렌더링해서 HTML로 표시
+        if (typeof marked !== 'undefined') {
+            entryBodyEl.innerHTML = marked.parse(note);
+        } else {
+            entryBodyEl.textContent = note;
+        }
     } else {
-        document.getElementById('entryBody').textContent = '내용이 없습니다.';
+        entryBodyEl.textContent = '내용이 없습니다.';
     }
 
     // 한 줄 요약 생성
@@ -81,7 +89,14 @@ function generateSummary(title, note, mood) {
     if (title) {
         summaryEl.textContent = prefix + title;
     } else if (note) {
-        const shortNote = note.length > 50 ? note.substring(0, 50) + '...' : note;
+        // 요약은 마크다운 문법 제거된 텍스트 위주로
+        let plain = note;
+        if (typeof marked !== 'undefined') {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = marked.parse(note);
+            plain = tmp.textContent || tmp.innerText || '';
+        }
+        const shortNote = plain.length > 50 ? plain.substring(0, 50) + '...' : plain;
         summaryEl.textContent = prefix + shortNote;
     }
 }
@@ -119,9 +134,15 @@ function renderLastYearDiary(currentDateStr) {
             document.getElementById('lastyearTitle').style.display = 'none';
         }
 
-        // 내용 미리보기 (100자)
+        // 내용 미리보기 (마크다운 렌더링 후 텍스트만 100자)
         if (note) {
-            const preview = note.length > 100 ? note.substring(0, 100) + '...' : note;
+            let plain = note;
+            if (typeof marked !== 'undefined') {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = marked.parse(note);
+                plain = tmp.textContent || tmp.innerText || '';
+            }
+            const preview = plain.length > 100 ? plain.substring(0, 100) + '...' : plain;
             document.getElementById('lastyearBody').textContent = preview;
         } else {
             document.getElementById('lastyearBody').textContent = '내용이 없습니다.';

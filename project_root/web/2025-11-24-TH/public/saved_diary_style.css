@@ -92,12 +92,65 @@ body {
     font-weight: 700;
 }
 
+/* ✅ 마크다운 렌더링 영역 */
 .entry-body {
-    white-space: pre-wrap;
     line-height: 1.75;
     color: #1f2937;
     font-size: 16px;
     min-height: 160px;
+}
+
+/* 기본 마크다운 스타일 */
+.entry-body h1,
+.entry-body h2,
+.entry-body h3 {
+    margin-top: 0.8em;
+    margin-bottom: 0.4em;
+    font-weight: 700;
+    color: #111827;
+}
+
+.entry-body h1 {
+    font-size: 1.6rem;
+}
+
+.entry-body h2 {
+    font-size: 1.35rem;
+}
+
+.entry-body h3 {
+    font-size: 1.15rem;
+}
+
+.entry-body p {
+    margin: 0.2em 0 0.7em;
+}
+
+.entry-body ul,
+.entry-body ol {
+    padding-left: 1.3rem;
+    margin: 0.2em 0 0.7em;
+}
+
+.entry-body li {
+    margin: 0.15em 0;
+}
+
+.entry-body code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.95em;
+    background: #f3f4ff;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.entry-body pre code {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #111827;
+    color: #e5e7eb;
+    overflow-x: auto;
 }
 
 /* 버튼 */

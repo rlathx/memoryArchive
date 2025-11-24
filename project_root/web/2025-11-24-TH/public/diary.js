@@ -99,6 +99,49 @@ const twoWeekAnalysisQuestions = {
 
 let dateStr = '';
 
+// ✅ 마크다운 뷰 모드 상태
+let diaryViewMode = 'markdown';
+
+// ✅ 마크다운 → HTML 렌더링 함수
+function updateRenderedNote() {
+    const textarea = document.getElementById('note');
+    const rendered = document.getElementById('noteRendered');
+    if (!textarea || !rendered) return;
+
+    const markdown = textarea.value || '';
+
+    if (typeof marked !== 'undefined') {
+        rendered.innerHTML = marked.parse(markdown);
+    } else {
+        rendered.textContent = markdown;
+    }
+}
+
+// ✅ 뷰 모드 전환 (Markdown / 렌더링)
+function setDiaryViewMode(mode) {
+    const textarea = document.getElementById('note');
+    const rendered = document.getElementById('noteRendered');
+    const btnMd = document.getElementById('btnMarkdownView');
+    const btnRender = document.getElementById('btnRenderedView');
+    if (!textarea || !rendered || !btnMd || !btnRender) return;
+
+    diaryViewMode = mode;
+
+    if (mode === 'markdown') {
+        textarea.style.display = 'block';
+        rendered.style.display = 'none';
+        btnMd.classList.add('active');
+        btnRender.classList.remove('active');
+    } else {
+        // 렌더링 모드일 때는 미리보기 갱신 후 토글
+        updateRenderedNote();
+        textarea.style.display = 'none';
+        rendered.style.display = 'block';
+        btnMd.classList.remove('active');
+        btnRender.classList.add('active');
+    }
+}
+
 // 페이지 로드 시 초기화
 window.onload = () => {
     // 날짜 세팅 (URL ?date=YYYY-MM-DD 없으면 오늘)
@@ -160,6 +203,31 @@ window.onload = () => {
         updateEmojiSelection('weatherList', null);
         loadTodayQuestion();
     });
+
+    // ✅ 마크다운 관련 요소 셋업
+    const noteTextarea = document.getElementById('note');
+    const noteRendered = document.getElementById('noteRendered');
+    const btnMd = document.getElementById('btnMarkdownView');
+    const btnRender = document.getElementById('btnRenderedView');
+
+    if (noteTextarea && noteRendered) {
+        // 입력 시마다 렌더링 내용 갱신 (렌더링 모드일 때 즉시 반영)
+        noteTextarea.addEventListener('input', () => {
+            if (diaryViewMode === 'rendered') {
+                updateRenderedNote();
+            }
+        });
+    }
+
+    if (btnMd && btnRender) {
+        btnMd.addEventListener('click', () => setDiaryViewMode('markdown'));
+        btnRender.addEventListener('click', () => setDiaryViewMode('rendered'));
+    }
+
+    // 기본은 Markdown 모드
+    setDiaryViewMode('markdown');
+    // 저장된 내용 기반으로 최초 렌더링 준비
+    updateRenderedNote();
 };
 
 // 저장된 일기 로드
@@ -170,7 +238,7 @@ function loadSavedDiary(dateStr) {
         document.getElementById('diaryTitle').value = savedTitle;
     }
 
-    // 일기 내용
+    // 일기 내용 (마크다운 원본)
     const savedNote = localStorage.getItem(`ma_note_${dateStr}`);
     if (savedNote) {
         document.getElementById('note').value = savedNote;
@@ -358,7 +426,7 @@ function getTwoWeekAnalysisQuestion() {
 // 일기 저장 (localStorage 기반)
 function saveDiary(dateStr) {
     const title = document.getElementById('diaryTitle').value.trim();
-    const content = document.getElementById('note').value.trim();
+    const content = document.getElementById('note').value.trim(); // ✅ 마크다운 원본 그대로 저장
 
     // 일기 제목 저장
     if (title) {
