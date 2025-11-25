@@ -77,7 +77,7 @@ body {
     border-color: #a78bfa;
 }
 
-/* ✅ 내용 헤더 + 뷰 토글 */
+/* 내용 헤더 + 뷰 토글 */
 .diary-view-toggle-row {
     display: flex;
     justify-content: space-between;
@@ -91,7 +91,7 @@ body {
     color: #374151;
 }
 
-/* ✅ 옵시디언 스타일 토글 */
+/* 옵시디언 스타일 토글 */
 .view-toggle {
     display: inline-flex;
     border-radius: 999px;
@@ -133,7 +133,7 @@ textarea {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* ✅ 렌더링 영역 */
+/* 렌더링 영역 */
 .diary-rendered {
     display: none;
     /* 기본은 마크다운 모드 */

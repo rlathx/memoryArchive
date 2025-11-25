@@ -292,7 +292,7 @@ function attachHandlers(cell, dateStr) {
         updateSelection();
     });
 
-    // ✅ 더블클릭 시: 해당 날짜에 저장된 일기가 있으면 saved_diary.html, 없으면 diary.html 로 이동
+    // 더블클릭 시: 해당 날짜에 저장된 일기가 있으면 saved_diary.html, 없으면 diary.html 로 이동
     cell.addEventListener('dblclick', () => {
         const hasTitle = !!localStorage.getItem(`ma_title_${dateStr}`);
         const hasNote = !!localStorage.getItem(`ma_note_${dateStr}`);
@@ -421,7 +421,7 @@ function renderLastYearToday() {
         }
 
         previewEl.innerHTML = preview;
-        // ✅ 작년 오늘도 읽기 전용 페이지로 이동
+        // 작년 오늘도 읽기 전용 페이지로 이동
         linkEl.href = `saved_diary.html?date=${lastYearDateStr}`;
         linkEl.style.display = 'inline-block';
     } else {

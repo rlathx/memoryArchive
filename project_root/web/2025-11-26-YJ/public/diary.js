@@ -99,10 +99,10 @@ const twoWeekAnalysisQuestions = {
 
 let dateStr = '';
 
-// ✅ 마크다운 뷰 모드 상태
+// 마크다운 뷰 모드 상태
 let diaryViewMode = 'markdown';
 
-// ✅ 마크다운 → HTML 렌더링 함수
+// 마크다운 → HTML 렌더링 함수
 function updateRenderedNote() {
     const textarea = document.getElementById('note');
     const rendered = document.getElementById('noteRendered');
@@ -117,7 +117,7 @@ function updateRenderedNote() {
     }
 }
 
-// ✅ 뷰 모드 전환 (Markdown / 렌더링)
+// 뷰 모드 전환 (Markdown / 렌더링)
 function setDiaryViewMode(mode) {
     const textarea = document.getElementById('note');
     const rendered = document.getElementById('noteRendered');
@@ -204,7 +204,7 @@ window.onload = () => {
         loadTodayQuestion();
     });
 
-    // ✅ 마크다운 관련 요소 셋업
+    // 마크다운 관련 요소 셋업
     const noteTextarea = document.getElementById('note');
     const noteRendered = document.getElementById('noteRendered');
     const btnMd = document.getElementById('btnMarkdownView');

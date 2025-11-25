@@ -60,7 +60,7 @@ function setupEventListeners() {
         fileInput.addEventListener('change', handleBackupFile);
     }
 
-    // 🔥 전체 데이터 초기화
+    // 전체 데이터 초기화
     const btnReset = document.getElementById('btnReset');
     if (btnReset) {
         btnReset.addEventListener('click', resetAllData);
