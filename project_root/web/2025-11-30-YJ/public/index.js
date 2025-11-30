@@ -247,6 +247,7 @@ function renderCalendar() {
         const note = localStorage.getItem(`ma_note_${dateStr}`);
         const emo = localStorage.getItem(`ma_mood_${dateStr}`);
         const weather = localStorage.getItem(`ma_weather_${dateStr}`);
+        const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${dateStr}`); //수정
 
         const hasTitle = !!(title && title.trim() !== '');
         const hasNote = !!(note && note.trim() !== '');
@@ -261,8 +262,8 @@ function renderCalendar() {
             cell.appendChild(badge);
             cell.classList.add('has-emoji');
         }
-        // 2) 날씨/이모지 둘 다 안 골랐는데, 일기(제목/내용)는 있는 경우 → 체크 표시
-        else if (!hasMood && !hasWeather && (hasTitle || hasNote)) {
+        // 2) 날씨/이모지 둘 다 없고, 일기 데이터(제목/내용/사진 등)가 있으면 체크 표시  //수정
+        else if (!hasMood && !hasWeather && (hasTitle || hasNote || hasDiaryFlag)) { //수정
             const check = document.createElement('span');
             check.className = 'check-mark';
             check.textContent = '✓';
@@ -298,8 +299,9 @@ function attachHandlers(cell, dateStr) {
         const hasNote = !!localStorage.getItem(`ma_note_${dateStr}`);
         const hasMood = !!localStorage.getItem(`ma_mood_${dateStr}`);
         const hasWeather = !!localStorage.getItem(`ma_weather_${dateStr}`);
+        const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${dateStr}`); //수정
 
-        if (hasTitle || hasNote || hasMood || hasWeather) {
+        if (hasDiaryFlag || hasTitle || hasNote || hasMood || hasWeather) { //수정
             window.location.href = `saved_diary.html?date=${dateStr}`;
         } else {
             window.location.href = `diary.html?date=${dateStr}`;
@@ -399,8 +401,9 @@ function renderLastYearToday() {
     const note = localStorage.getItem(`ma_note_${lastYearDateStr}`);
     const mood = localStorage.getItem(`ma_mood_${lastYearDateStr}`);
     const weather = localStorage.getItem(`ma_weather_${lastYearDateStr}`);
+    const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${lastYearDateStr}`); //수정
 
-    if (title || note || mood || weather) {
+    if (hasDiaryFlag || title || note || mood || weather) { //수정
         let preview = '';
 
         // 이모지 표시

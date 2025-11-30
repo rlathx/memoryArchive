@@ -104,7 +104,8 @@ window.onload = () => {
 function generateSummary(title, note, mood, moodPhoto) {
     const summaryEl = document.getElementById('summaryText');
 
-    if (!note && !title) {
+    // 텍스트도 없고, 사진(기분 사진)도 없을 때만 "기록 없음" 처리 //수정
+    if (!note && !title && !moodPhoto) { //수정
         summaryEl.textContent = '기록된 내용이 없습니다.';
         return;
     }
@@ -115,7 +116,7 @@ function generateSummary(title, note, mood, moodPhoto) {
     const negativeMoods = ['😢', '😭', '😡'];
 
     if (moodPhoto) {
-        prefix = '사진으로 표현한 하루. ';
+        prefix = '사진으로 표현한 하루. '; //수정
     } else if (mood) {
         if (positiveMoods.includes(mood)) {
             prefix = '행복한 하루! ';
@@ -124,7 +125,7 @@ function generateSummary(title, note, mood, moodPhoto) {
         }
     }
 
-    // 제목이 있으면 제목 기반, 없으면 내용 앞부분
+    // 제목이 있으면 제목 기반, 없으면 내용 앞부분, 둘 다 없고 사진만 있을 때는 사진 설명 //수정
     if (title) {
         summaryEl.textContent = prefix + title;
     } else if (note) {
@@ -137,6 +138,9 @@ function generateSummary(title, note, mood, moodPhoto) {
         }
         const shortNote = plain.length > 50 ? plain.substring(0, 50) + '...' : plain;
         summaryEl.textContent = prefix + shortNote;
+    } else if (moodPhoto) { //수정
+        // 텍스트는 없고 사진만 있는 날 요약 //수정
+        summaryEl.textContent = prefix || '사진으로 표현한 하루.'; //수정
     }
 }
 
