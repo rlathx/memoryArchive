@@ -62,17 +62,50 @@ body {
     color: #374151;
 }
 
+/* ★수정: 라벨과 값을 가로로 정렬 */
+/* 메타 레이아웃 살짝 정리 (라벨 옆에 값) */
 .meta-row {
     margin: 6px 0;
+    display: flex;
+    /* 라벨 + 값 가로 배치 */
+    /*수정*/
+    align-items: center;
+    /* 세로 가운데 정렬 */
+    /*수정*/
+    gap: 8px;
+    /* 라벨-값 사이 여백 */
+    /*수정*/
 }
 
 .meta-label {
     font-weight: 700;
     color: #06b6d4;
+    min-width: 48px;
+    /* "날짜:", "기분:" 폭 고정 */
+    /*수정*/
 }
 
 .meta-value {
     color: var(--muted);
+    display: inline-flex;
+    /* 값(텍스트/이미지)을 한 줄에 */
+    /*수정*/
+    align-items: center;
+    /*수정*/
+}
+
+/* ★수정: saved_diary에서 기분 사진 크기 & 모양 */
+#metaMood img {
+    width: 80px;
+    /* 적당히 2배 정도 크기 */
+    /* ★수정 */
+    height: 80px;
+    /* 필요하면 72~96 사이로 조절 가능 */
+    border-radius: 16px;
+    /* 살짝 둥글게 */
+    object-fit: cover;
+    /* 비율 유지하면서 꽉 차게 */
+    display: block;
 }
 
 /* 본문 카드 */

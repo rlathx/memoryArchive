@@ -248,13 +248,17 @@ function renderCalendar() {
         const emo = localStorage.getItem(`ma_mood_${dateStr}`);
         const weather = localStorage.getItem(`ma_weather_${dateStr}`);
         const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${dateStr}`); //수정
+        const moodPhoto = localStorage.getItem(`ma_mood_photo_${dateStr}`);      //수정
+        const notePhotos = localStorage.getItem(`ma_note_photos_${dateStr}`);    //수정
 
         const hasTitle = !!(title && title.trim() !== '');
         const hasNote = !!(note && note.trim() !== '');
         const hasMood = !!(emo && emo.trim() !== '');
         const hasWeather = !!(weather && weather.trim() !== '');
+        const hasMoodPhoto = !!moodPhoto;                                        //수정
+        const hasNotePhotos = !!notePhotos && notePhotos !== '[]';
 
-        // 1) 기분 이모지가 있으면 → 기존처럼 이모지 뱃지 표시
+        // 1) 기분 이모지가 있으면 → 이모지 뱃지
         if (hasMood) {
             const badge = document.createElement('span');
             badge.className = 'mood-emoji';
@@ -262,14 +266,29 @@ function renderCalendar() {
             cell.appendChild(badge);
             cell.classList.add('has-emoji');
         }
-        // 2) 날씨/이모지 둘 다 없고, 일기 데이터(제목/내용/사진 등)가 있으면 체크 표시  //수정
-        else if (!hasMood && !hasWeather && (hasTitle || hasNote || hasDiaryFlag)) { //수정
+        // 2) 기분 사진(moodPhoto)이 있으면 → 카메라 이모지 📷 표시   //수정
+        else if (hasMoodPhoto) {                                       //수정
+            const cam = document.createElement('span');                //수정
+            cam.className = 'mood-emoji mood-photo-icon';              //수정
+            cam.textContent = '📷';                                    //수정
+            cell.appendChild(cam);                                     //수정
+            cell.classList.add('has-emoji');                           //수정
+        }
+        // 3) 날씨/이모지/기분사진 다 없고,
+        //    제목/내용/일기사진 중 하나라도 있으면 → 체크 표시      //수정
+        else if (
+            !hasMood &&
+            !hasWeather &&
+            !hasMoodPhoto &&                          // 기분 사진이 없을 때만 체크   //수정
+            (hasTitle || hasNote || hasNotePhotos)    // 일기 사진만 있어도 체크     //수정
+        ) {
             const check = document.createElement('span');
             check.className = 'check-mark';
             check.textContent = '✓';
             cell.appendChild(check);
             cell.classList.add('has-check');
         }
+
 
         attachHandlers(cell, dateStr);
         grid.appendChild(cell);
@@ -300,8 +319,19 @@ function attachHandlers(cell, dateStr) {
         const hasMood = !!localStorage.getItem(`ma_mood_${dateStr}`);
         const hasWeather = !!localStorage.getItem(`ma_weather_${dateStr}`);
         const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${dateStr}`); //수정
+        const moodPhoto = localStorage.getItem(`ma_mood_photo_${dateStr}`);      //수정
+        const notePhotos = localStorage.getItem(`ma_note_photos_${dateStr}`);     //수정
+        const hasMoodPhoto = !!moodPhoto;                                         //수정
+        const hasNotePhotos = !!notePhotos && notePhotos !== '[]';
 
-        if (hasDiaryFlag || hasTitle || hasNote || hasMood || hasWeather) { //수정
+        if (
+            hasTitle ||
+            hasNote ||
+            hasMood ||
+            hasWeather ||
+            hasMoodPhoto ||    //수정
+            hasNotePhotos      //수정
+        ) { //수정
             window.location.href = `saved_diary.html?date=${dateStr}`;
         } else {
             window.location.href = `diary.html?date=${dateStr}`;

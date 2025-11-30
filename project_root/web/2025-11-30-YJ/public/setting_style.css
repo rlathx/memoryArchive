@@ -124,6 +124,43 @@ label {
     opacity: 0.9;
 }
 
+.meta-row {
+    /*수정*/
+    display: flex;
+    /* 라벨 + 값 가로로 배치 */
+    /*수정*/
+    align-items: center;
+    /* 세로 가운데 정렬 */
+    /*수정*/
+    gap: 12px;
+    /* 라벨과 값 사이 여백 */
+    /*수정*/
+}
+
+.meta-label {
+    /*수정*/
+    min-width: 50px;
+    /* "날짜:", "기분:" 폭 맞추기 */
+    /*수정*/
+}
+
+.meta-value {
+    /*수정*/
+    display: inline-flex;
+    /* 값(텍스트/이미지)을 한 줄로 */
+    /*수정*/
+    align-items: center;
+    /* 이미지도 가운데 정렬 */
+    /*수정*/
+}
+
+#metaMood img {
+    /*수정*/
+    display: block;
+    /* 줄 간격 깔끔하게 */
+    /*수정*/
+}
+
 /* 반응형 */
 @media (max-width: 576px) {
     body {

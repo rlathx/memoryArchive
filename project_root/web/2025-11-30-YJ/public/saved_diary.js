@@ -27,14 +27,20 @@ window.onload = () => {
     document.getElementById('metaDate').textContent = dateStr;
 
     // 기분 표시 (사진 또는 이모지)
-    if (moodPhoto) {
+    if (moodPhoto && moodPhoto !== 'null') {
         const moodEl = document.getElementById('metaMood');
         const img = document.createElement('img');
-        img.src = moodPhoto;
-        img.style.width = '24px';
-        img.style.height = '24px';
-        img.style.borderRadius = '4px';
+
+        img.src = moodPhoto;                // ★★ 중요: 이 줄이 없어서 사진이 안 떴던 것 ★★
+
+        // 크기 (128px이면 너무 크면 80~100px로 조절 가능)
+        img.style.width = '100px';
+        img.style.height = '100px';
+        img.style.borderRadius = '16px';
+        img.style.objectFit = 'cover';
+        img.style.display = 'inline-block';
         img.style.verticalAlign = 'middle';
+
         moodEl.textContent = '';
         moodEl.appendChild(img);
     } else {
@@ -42,6 +48,7 @@ window.onload = () => {
     }
 
     document.getElementById('metaWeather').textContent = weather || '—';
+
 
     // 본문 표시
     const entryTitleEl = document.getElementById('entryTitle');
