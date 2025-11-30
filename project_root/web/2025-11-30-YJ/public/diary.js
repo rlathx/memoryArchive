@@ -864,11 +864,25 @@ function loadTodayQuestion() {
     if (!listEl) return;
 
     listEl.innerHTML = selectedQs
-        .map((q, i) => `
-                <li class="question-item">
-                    <span class="q-text">${q}</span>
-                </li>
-            `)
+        .map(q => {
+            let category = 'basic'; // 기본값
+
+            // MBTI 질문인지 확인
+            if (mbti && mbtiQuestions[mbti] && mbtiQuestions[mbti].includes(q)) {
+                category = 'mbti';
+            }
+            // 사용자 정의 질문인지 확인
+            else if (customQuestionsArr.includes(q)) {
+                category = 'custom';
+            }
+            // 기본 질문(defaultQuestions)은 기본값 basic 유지
+
+            return `
+            <li class="question-item question-${category}">
+                <span class="q-text">${q}</span>
+            </li>
+        `;
+        })
         .join('');
 }
 

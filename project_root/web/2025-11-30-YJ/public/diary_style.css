@@ -433,7 +433,8 @@ textarea {
     align-items: center;
 }
 
-#question-list li {
+/* ✅ 기본 질문 카드 공통 스타일 */
+.question-item {
     font-size: 16px;
     font-weight: 500;
     color: #2d1b69;
@@ -445,8 +446,36 @@ textarea {
     max-width: 520px;
     line-height: 1.5;
     box-shadow: 0 2px 4px rgba(139, 92, 246, 0.06);
+    transition: box-shadow 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
 }
 
-#question-list li:hover {
+.question-item:hover {
     box-shadow: 0 3px 8px rgba(139, 92, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+/* 카테고리별 색상 */
+/* MBTI 질문 = 하늘색 */
+.question-item.question-mbti {
+    border-color: #38bdf8;
+    /* 하늘색 */
+}
+
+/* 기분 질문 전체 = 핑크색 */
+.question-item.question-basic {
+    border-color: #f9a8d4;
+    /* 핑크색 */
+}
+
+/* 사용자 질문 = 좀 더 차분한 연두/민트색 */
+.question-item.question-custom {
+    border-color: #34d399;
+    /* 차분한 민트 */
+}
+
+
+/* 텍스트 span */
+.question-item .q-text {
+    display: inline-block;
+    width: 100%;
 }
