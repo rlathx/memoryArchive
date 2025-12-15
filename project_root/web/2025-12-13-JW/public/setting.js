@@ -27,8 +27,9 @@ const defaultQuestions = [
 
 // 페이지 로드 시 초기화
 window.onload = () => {
-    loadSettings();
-    loadCustomQuestions();
+    loadCustomQuestions();       // 1. 질문 목록 로드 (가장 먼저!)
+    updateCustomCountOptions();  // 2. 드롭다운 옵션 생성 (목록 개수에 맞춰서 0~N개 생성)
+    loadSettings();              // 3. 설정값 적용 (드롭다운이 완성된 상태여야 값 선택 가능)
     renderCustomQuestions();
     setupEventListeners();
 };
@@ -132,11 +133,8 @@ function loadCustomQuestions() {
     customQuestions = saved ? JSON.parse(saved) : [];
 }
 
-// 설정 저장
-// 설정 저장 (성공 시 true, 실패 시 false 반환)
+// 설정 저장 함수 (0개여도 저장 허용)
 function saveSettings() {
-    const questionCount = parseInt(document.getElementById('questionCount').value, 10);
-
     const mbtiCount = parseInt(document.getElementById('countMbti').value, 10);
     const basicCount = parseInt(document.getElementById('countBasic').value, 10);
     const customCount = parseInt(document.getElementById('countCustom').value, 10);
@@ -148,33 +146,28 @@ function saveSettings() {
 
     /* 1. MBTI 미선택인데 MBTI 질문 개수 > 0 */
     if (mbtiCount > 0 && !selectedMBTI) {
+        alert('MBTI 질문 개수를 설정하려면 먼저 MBTI를 선택해주세요.'); 
         errorBox.textContent = 'MBTI 질문 개수를 설정하려면 먼저 MBTI를 선택해주세요.';
         errorBox.style.display = 'block';
-        return false; // 실패 반환
+        return false;
     }
 
-    /* 2. 사용자 질문 개수 > 0 인데 질문이 없음 */
+    /* 2. 사용자 질문 개수 > 0 인데 질문이 부족함 */
     if (customCount > customQuestions.length) {
         errorBox.textContent = `설정한 개수(${customCount}개)보다 등록된 나만의 질문(${customQuestions.length}개)이 부족합니다. 질문을 더 추가해주세요.`;
         errorBox.style.display = 'block';
         return false;
     }
 
-    /* 3. 질문 총합 불일치 검사 */
-    const sum = mbtiCount + basicCount + customCount;
-
-    if (sum !== questionCount) {
-        errorBox.textContent = `질문 개수 설정 오류: 현재 ${sum}개입니다. (하루 질문 개수: ${questionCount}개와 불일치)`;
-        errorBox.style.display = 'block';
-        return false; // 실패 반환
-    }
+    /* 3. 총 질문 개수 계산 (자동 합산) */
+    const questionCount = mbtiCount + basicCount + customCount;
     
-    /* 오류 없으면 오류 숨김 */
+    /* 오류 없으면 오류 박스 숨김 */
     errorBox.style.display = 'none';
 
     /* 정상 저장 */
     const currentSettings = {
-        questionCount,
+        questionCount, 
         mbtiCount,
         basicCount,
         customCount,
@@ -203,6 +196,34 @@ function saveSettings() {
     }
 }
 
+// 사용자 질문 개수 드롭다운 옵션 업데이트 (등록된 개수까지만 선택 가능)
+function updateCustomCountOptions() {
+    const customSel = document.getElementById('countCustom');
+    if (!customSel) return;
+
+    // 현재 선택된 값 저장 (옵션을 다시 만들면 선택이 풀리므로)
+    const currentVal = parseInt(customSel.value, 10) || 0;
+    const max = customQuestions.length; // 현재 등록된 질문 개수
+
+    // 기존 옵션 비우기
+    customSel.innerHTML = '';
+
+    // 0부터 max까지 옵션 생성
+    for (let i = 0; i <= max; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        customSel.appendChild(opt);
+    }
+
+    // 아까 선택했던 값이 유효하면 유지, 범위를 벗어나면 최대값으로 조정
+    if (currentVal > max) {
+        customSel.value = max;
+    } else {
+        customSel.value = currentVal;
+    }
+}
+
 // 저장 완료 뱃지
 function showSavedBadge() {
     const badge = document.getElementById('savedOk');
@@ -225,8 +246,10 @@ function addCustomQuestion() {
     input.value = '';
     renderCustomQuestions();
 
-    // 무조건 숨기지 않고, 개수가 충족되었는지 확인
-    saveSettings();
+    updateCustomCountOptions();
+    checkCustomQuestionCount(); // 실시간 문구 갱신
+    saveSettings()
+
 }
 
 // 사용자 정의 질문 삭제
@@ -236,6 +259,9 @@ function deleteCustomQuestion(index) {
     localStorage.setItem('ma_custom_questions', JSON.stringify(customQuestions));
     renderCustomQuestions();
 
+    // ✅ 드롭다운 옵션 갱신 & 설정 검증
+    updateCustomCountOptions();
+    checkCustomQuestionCount(); // 실시간 문구 갱신
     saveSettings();
 }
 
@@ -381,4 +407,48 @@ function resetAllData() {
 
     alert('전체 데이터가 초기화되었습니다.\n메인 화면으로 이동합니다.');
     window.location.href = 'index.html';
+}
+
+// [신규] 사용자 질문 개수 드롭다운 옵션 업데이트 (등록된 개수까지만 선택 가능)
+function updateCustomCountOptions() {
+    const customSel = document.getElementById('countCustom');
+    if (!customSel) return;
+
+    // 현재 선택된 값 저장
+    const currentVal = parseInt(customSel.value, 10) || 0;
+    const max = customQuestions.length; // 현재 등록된 질문 개수
+
+    // 기존 옵션 비우기
+    customSel.innerHTML = '';
+
+    // 0부터 max까지 옵션 생성
+    for (let i = 0; i <= max; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        customSel.appendChild(opt);
+    }
+
+    // 선택값 복원 (범위 벗어나면 최대값으로)
+    if (currentVal > max) {
+        customSel.value = max;
+    } else {
+        customSel.value = currentVal;
+    }
+}
+
+// [신규] 실시간 개수 점검 함수 (saveSettings 밖으로 이동됨)
+function checkCustomQuestionCount() {
+    const customCount = parseInt(document.getElementById('countCustom').value, 10);
+    const currentLen = customQuestions.length;
+    const errorBox = document.getElementById('questionCountError');
+
+    if (!errorBox) return;
+
+    if (customCount > currentLen) {
+        errorBox.textContent = `설정한 개수(${customCount}개)보다 등록된 질문(${currentLen}개)이 부족합니다. 더 추가해주세요.`;
+        errorBox.style.display = 'block';
+    } else {
+        errorBox.style.display = 'none';
+    }
 }

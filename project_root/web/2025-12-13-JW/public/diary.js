@@ -740,13 +740,13 @@ function updateEmojiSelection(listId, selectedEmoji) {
     });
 }
 
-// 오늘의 질문 로드 (초기 설정 없을 시 기본 3개 나오도록 수정)
+// [diary.js] loadTodayQuestion 함수 수정
+
 function loadTodayQuestion() {
     const settings = JSON.parse(localStorage.getItem('ma_settings')) || {};
     const mbti = settings.selectedMBTI;
 
-    // 1. 설정된 개수 가져오기
-    // ★ 수정됨: settings.basicCount가 undefined(초기상태)면 3으로 설정
+    // 1. 설정된 개수 가져오기 (없으면 0으로 처리)
     const mbtiCount = (settings.mbtiCount !== undefined) ? parseInt(settings.mbtiCount) : 0;
     const basicCount = (settings.basicCount !== undefined) ? parseInt(settings.basicCount) : 3;
     const customCount = (settings.customCount !== undefined) ? parseInt(settings.customCount) : 0;
@@ -756,46 +756,46 @@ function loadTodayQuestion() {
     const customQuestionsArr = JSON.parse(localStorage.getItem('ma_custom_questions')) || [];
     const defaultQuestionsArr = defaultQuestions;
 
-    // 3. 질문 뽑기
-    
-    // (1) MBTI 질문 뽑기
+    // 3. 질문 뽑기 (MBTI, 사용자, 기본)
     const mbtiSet = pickRandom(mbtiQuestionsArr, mbtiCount);
-
-    // (2) 사용자 질문 뽑기
     const customSet = pickRandom(customQuestionsArr, customCount);
 
-    // (3) 기본 질문 뽑기 (2주 분석 질문 포함 로직)
     let basicSet = [];
-    
-    // 2주 분석 질문 가져오기
     const twoWeekQuestion = getTwoWeekAnalysisQuestion();
 
     if (twoWeekQuestion && basicCount > 0) {
-        // 분석 질문 1개 추가
         basicSet.push(twoWeekQuestion);
-        
-        // 남은 개수만큼 랜덤 기본 질문 추가
         const remainingCount = basicCount - 1;
         if (remainingCount > 0) {
             const randomBasics = pickRandom(defaultQuestionsArr, remainingCount);
             basicSet = [...basicSet, ...randomBasics];
         }
     } else {
-        // 분석 질문 없거나 개수 0이면 그냥 랜덤 뽑기
         basicSet = pickRandom(defaultQuestionsArr, basicCount);
     }
 
     // 4. 질문 합치기
     let finalQuestions = [...mbtiSet, ...basicSet, ...customSet];
 
-    // 만약 질문이 하나도 없다면(모든 설정 0) 기본 질문 1개 표시
-    if (finalQuestions.length === 0) {
-        finalQuestions.push(defaultQuestionsArr[0]);
-    }
-
     // 5. 화면에 렌더링
     const listEl = document.getElementById('question-list');
+    const sectionEl = document.querySelector('.question-section');
+
     if (!listEl) return;
+
+    // ✅ [수정됨] 질문이 0개일 때 안내 문구 표시
+    if (finalQuestions.length === 0) {
+        if (sectionEl) sectionEl.style.display = 'block'; // 섹션 표시
+        listEl.innerHTML = `
+            <li class="question-empty-msg">
+                질문을 추가하시면 일기 작성에 도움이 될 수 있어요! ✨
+            </li>
+        `;
+        return;
+    }
+
+    // 질문이 있을 때
+    if (sectionEl) sectionEl.style.display = 'block';
 
     listEl.innerHTML = finalQuestions.map(q => {
         let category = 'basic'; 
@@ -807,9 +807,6 @@ function loadTodayQuestion() {
         } else if (customQuestionsArr.includes(q)) {
             category = 'custom';
             label = '나만의 질문';
-        } else {
-            category = 'basic';
-            label = '기본 질문';
         }
         
         return `
