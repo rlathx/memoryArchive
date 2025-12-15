@@ -83,12 +83,6 @@ label {
     font-size: 12px;
 }
 
-.sep {
-    height: 1px;
-    background: var(--grid-border);
-    margin: 18px 0;
-}
-
 /* 저장 완료 뱃지 */
 .ok-badge {
     display: none;
