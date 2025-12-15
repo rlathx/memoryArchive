@@ -104,17 +104,17 @@ const mbtiMessages = {
 
 // 감정 기반 추가 메시지
 const moodBasedMessages = {
-    positive: [ // 😊😍🥳😎
+    positive: [
         "오늘 기분이 좋으시네요! 이 좋은 에너지 오래 간직하세요.",
         "행복한 하루를 보내고 계시네요. 이 순간을 기억해두세요!",
         "긍정적인 에너지가 느껴져요. 오늘 하루도 빛나세요!"
     ],
-    neutral: [ // 🤔😴
+    neutral: [
         "평온한 하루네요. 가끔은 이런 날도 필요해요.",
         "조용한 하루도 의미 있어요. 천천히 가도 괜찮아요.",
         "생각이 많은 날이네요. 좋은 아이디어가 떠오를 거예요."
     ],
-    negative: [ // 😢😭😡
+    negative: [
         "힘든 하루였나요? 괜찮아요, 내일은 더 나아질 거예요.",
         "우울한 날도 있어요. 자신을 너무 몰아붙이지 마세요.",
         "감정을 느끼는 것도 용기예요. 천천히 회복하세요."
@@ -123,19 +123,19 @@ const moodBasedMessages = {
 
 // 날씨 기반 추가 메시지
 const weatherBasedMessages = {
-    sunny: [ // ☀️🌤️🌈
+    sunny: [
         "화창한 날씨처럼 마음도 맑아지길 바라요!",
         "좋은 날씨네요. 잠깐이라도 바깥 공기를 마셔보세요."
     ],
-    cloudy: [ // ⛅💨
+    cloudy: [
         "흐린 날씨에도 구름 위에는 항상 태양이 있어요.",
         "바람이 부는 날이네요. 새로운 변화의 바람일지도 몰라요."
     ],
-    rainy: [ // 🌧️⛈️
+    rainy: [
         "비 오는 날도 운치 있어요. 따뜻한 음료 한 잔 어떠세요?",
         "빗소리를 들으며 잠시 쉬어가는 것도 좋아요."
     ],
-    snowy: [ // ❄️🌨️
+    snowy: [
         "눈 오는 날이네요. 포근하게 보내세요!",
         "겨울 날씨에는 따뜻함이 더 소중해져요."
     ]
@@ -247,16 +247,20 @@ function renderCalendar() {
         const note = localStorage.getItem(`ma_note_${dateStr}`);
         const emo = localStorage.getItem(`ma_mood_${dateStr}`);
         const weather = localStorage.getItem(`ma_weather_${dateStr}`);
-        const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${dateStr}`); //수정
-        const moodPhoto = localStorage.getItem(`ma_mood_photo_${dateStr}`);      //수정
-        const notePhotos = localStorage.getItem(`ma_note_photos_${dateStr}`);    //수정
+        const moodPhoto = localStorage.getItem(`ma_mood_photo_${dateStr}`);
+        const notePhotos = localStorage.getItem(`ma_note_photos_${dateStr}`);
+        
+        // ✅ [추가됨] 질문 데이터 확인
+        const questions = localStorage.getItem(`ma_questions_${dateStr}`);
 
         const hasTitle = !!(title && title.trim() !== '');
         const hasNote = !!(note && note.trim() !== '');
         const hasMood = !!(emo && emo.trim() !== '');
         const hasWeather = !!(weather && weather.trim() !== '');
-        const hasMoodPhoto = !!moodPhoto;                                        //수정
+        const hasMoodPhoto = !!moodPhoto;
         const hasNotePhotos = !!notePhotos && notePhotos !== '[]';
+        // ✅ 질문이 있으면 체크
+        const hasQuestions = !!questions;
 
         // 1) 기분 이모지가 있으면 → 이모지 뱃지
         if (hasMood) {
@@ -266,21 +270,20 @@ function renderCalendar() {
             cell.appendChild(badge);
             cell.classList.add('has-emoji');
         }
-        // 2) 기분 사진(moodPhoto)이 있으면 → 카메라 이모지 📷 표시   //수정
-        else if (hasMoodPhoto) {                                       //수정
-            const cam = document.createElement('span');                //수정
-            cam.className = 'mood-emoji mood-photo-icon';              //수정
-            cam.textContent = '📷';                                    //수정
-            cell.appendChild(cam);                                     //수정
-            cell.classList.add('has-emoji');                           //수정
+        // 2) 기분 사진이 있으면 → 카메라 이모지 📷
+        else if (hasMoodPhoto) {
+            const cam = document.createElement('span');
+            cam.className = 'mood-emoji mood-photo-icon';
+            cam.textContent = '📷';
+            cell.appendChild(cam);
+            cell.classList.add('has-emoji');
         }
-        // 3) 날씨/이모지/기분사진 다 없고,
-        //    제목/내용/일기사진 중 하나라도 있으면 → 체크 표시      //수정
+        // 3) 그 외 기록(제목/내용/사진/**질문**)이 하나라도 있으면 → 체크 표시 ✓
         else if (
             !hasMood &&
             !hasWeather &&
-            !hasMoodPhoto &&                          // 기분 사진이 없을 때만 체크   //수정
-            (hasTitle || hasNote || hasNotePhotos)    // 일기 사진만 있어도 체크     //수정
+            !hasMoodPhoto &&
+            (hasTitle || hasNote || hasNotePhotos || hasQuestions) // ✅ 여기에 hasQuestions 추가!
         ) {
             const check = document.createElement('span');
             check.className = 'check-mark';
@@ -288,7 +291,6 @@ function renderCalendar() {
             cell.appendChild(check);
             cell.classList.add('has-check');
         }
-
 
         attachHandlers(cell, dateStr);
         grid.appendChild(cell);
@@ -306,34 +308,24 @@ function renderCalendar() {
     updateSelection();
 }
 
+// ✅ [핵심 수정] 클릭 핸들러 (이동 로직 단순화)
 function attachHandlers(cell, dateStr) {
     cell.addEventListener('click', () => {
         selectedDate = dateStr;
         updateSelection();
     });
 
-    // 더블클릭 시: 해당 날짜에 저장된 일기가 있으면 saved_diary.html, 없으면 diary.html 로 이동
+    // 더블클릭 시 이동 로직
     cell.addEventListener('dblclick', () => {
-        const hasTitle = !!localStorage.getItem(`ma_title_${dateStr}`);
-        const hasNote = !!localStorage.getItem(`ma_note_${dateStr}`);
-        const hasMood = !!localStorage.getItem(`ma_mood_${dateStr}`);
-        const hasWeather = !!localStorage.getItem(`ma_weather_${dateStr}`);
-        const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${dateStr}`); //수정
-        const moodPhoto = localStorage.getItem(`ma_mood_photo_${dateStr}`);      //수정
-        const notePhotos = localStorage.getItem(`ma_note_photos_${dateStr}`);     //수정
-        const hasMoodPhoto = !!moodPhoto;                                         //수정
-        const hasNotePhotos = !!notePhotos && notePhotos !== '[]';
+        // diary.js에서 저장할 때 만들어둔 'ma_has_diary_' 플래그를 확인합니다.
+        // 이 플래그는 질문만 있어도, 내용만 있어도 항상 '1'로 저장되므로 믿을 수 있습니다.
+        const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${dateStr}`);
 
-        if (
-            hasTitle ||
-            hasNote ||
-            hasMood ||
-            hasWeather ||
-            hasMoodPhoto ||    //수정
-            hasNotePhotos      //수정
-        ) { //수정
+        if (hasDiaryFlag) {
+            // 일기가 있으면 보기 페이지로
             window.location.href = `saved_diary.html?date=${dateStr}`;
         } else {
+            // 없으면 작성 페이지로
             window.location.href = `diary.html?date=${dateStr}`;
         }
     });
@@ -427,13 +419,16 @@ function renderLastYearToday() {
     dateEl.textContent = `${lastYear}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
 
     // 작년 일기 확인
+    const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${lastYearDateStr}`);
+    
+    // 혹시 몰라 개별 데이터도 확인 (하위 호환성)
     const title = localStorage.getItem(`ma_title_${lastYearDateStr}`);
     const note = localStorage.getItem(`ma_note_${lastYearDateStr}`);
     const mood = localStorage.getItem(`ma_mood_${lastYearDateStr}`);
     const weather = localStorage.getItem(`ma_weather_${lastYearDateStr}`);
-    const hasDiaryFlag = !!localStorage.getItem(`ma_has_diary_${lastYearDateStr}`); //수정
+    const savedQs = localStorage.getItem(`ma_questions_${lastYearDateStr}`); // 질문도 확인
 
-    if (hasDiaryFlag || title || note || mood || weather) { //수정
+    if (hasDiaryFlag || title || note || mood || weather || savedQs) {
         let preview = '';
 
         // 이모지 표시
@@ -449,6 +444,8 @@ function renderLastYearToday() {
             preview += `<strong>${title}</strong>`;
         } else if (note) {
             preview += note.length > 30 ? note.substring(0, 30) + '...' : note;
+        } else if (savedQs) {
+            preview += '질문으로 남긴 기록이 있어요!';
         } else {
             preview += '기록이 있어요!';
         }

@@ -8,7 +8,6 @@
 
     <link rel="stylesheet" href="diary_style.css" />
 
-    <!-- 마크다운 라이브러리 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
@@ -34,17 +33,20 @@
             </div>
         </div>
 
-        <!-- 오늘의 질문 -->
         <div class="question-section">
-            <h3>오늘의 질문 💭</h3>
+            <h3>
+                오늘의 질문 💭
+                <button class="btn-reset" id="btnRefreshQuestions">
+                    <i class="bi bi-arrow-clockwise"></i> 새로고침
+                </button>
+            </h3>
+            <p class="question-guide-text">일기를 쓸 때 활용한 질문을 선택해주세요!</p>
             <ul id="question-list"></ul>
-        </div>
 
-        <!-- 일기 입력 -->
+        </div>
         <div class="diary-input">
             <input type="text" id="diaryTitle" class="diary-title-input" placeholder="오늘의 제목을 입력하세요 📌" />
 
-            <!-- 마크다운 / 렌더링 토글 -->
             <div class="diary-view-toggle-row">
                 <span class="diary-view-label">내용</span>
                 <div class="view-toggle">
@@ -57,13 +59,10 @@
                 </div>
             </div>
 
-            <!-- 마크다운 원본 입력 -->
             <textarea id="note" placeholder="오늘의 하루를 마크다운으로 기록해보세요... ✨"></textarea>
 
-            <!-- 렌더링된 미리보기 -->
             <div id="noteRendered" class="diary-rendered"></div>
 
-            <!-- 사진 첨부 섹션 -->
             <div class="photo-attach-section">
                 <label for="notePhotoInput" class="btn btn-photo-attach">
                     📷 사진 첨부
@@ -73,13 +72,11 @@
             </div>
         </div>
 
-        <!-- 버튼 -->
         <div class="button-row">
             <button type="button" class="btn" id="btnBack">← 뒤로가기</button>
             <button type="button" class="btn save" id="btnSave">저장하기 💾</button>
         </div>
 
-        <!-- 기분 / 날씨 -->
         <div class="emoji-section">
             <h3>오늘의 기분은 어떤가요?<button class="btn-reset" id="btnResetMood">초기화</button></h3>
             <div class="emoji-list" id="moodList">

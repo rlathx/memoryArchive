@@ -433,7 +433,7 @@ textarea {
     align-items: center;
 }
 
-/* ✅ 기본 질문 카드 공통 스타일 */
+/* 기본 질문 카드 공통 스타일 */
 .question-item {
     font-size: 16px;
     font-weight: 500;
@@ -441,25 +441,32 @@ textarea {
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-    padding: 10px 16px;
+    padding: 16px 20px;
     width: 90%;
     max-width: 520px;
     line-height: 1.5;
     box-shadow: 0 2px 4px rgba(139, 92, 246, 0.06);
-    transition: box-shadow 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
-    display: flex;              /* 내부 요소를 플렉스 박스로 설정 */
-    flex-direction: row;        /* 가로 방향 배치 (뱃지 -> 텍스트) */
-    align-items: center;        /* 세로 중앙 정렬 */
-    justify-content: center;    /* 전체 내용을 가운데 정렬 */
-    gap: 8px;                  /* 뱃지와 텍스트 사이 간격 */
-    
-    min-height: auto;           /* 높이 자동 조절 */
-    padding: 16px 20px;         /* 상하좌우 여백 균일하게 */
+    transition: all 0.2s ease; /* 애니메이션 부드럽게 */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: auto;
+    cursor: pointer; /* 클릭 가능함을 표시 */
 }
 
 .question-item:hover {
-    box-shadow: 0 3px 8px rgba(139, 92, 246, 0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.question-item.selected {
+    border: 2px solid #7c3aed !important; /* 진한 보라색 테두리 (강제 적용) */
+    background-color: #f5f3ff;            /* 연한 보라색 배경 */
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1); /* 외곽 광채 효과 */
+    transform: scale(1.02);               /* 살짝 커짐 */
+    font-weight: 600;                     /* 글씨 조금 더 진하게 */
 }
 
 /* 카테고리별 색상 */
@@ -537,4 +544,11 @@ textarea {
     padding: 20px;
     list-style: none;        /* 리스트 점 제거 */
     width: 90%;              /* 너비 맞춤 */
+}
+
+.question-guide-text {
+    margin: -5px 0 15px 0; /* 제목과 간격 조절 */
+    font-size: 14px;
+    color: #6b7280; /* 회색 텍스트 */
+    font-weight: 400;
 }

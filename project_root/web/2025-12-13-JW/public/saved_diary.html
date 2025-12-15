@@ -6,18 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Memory Archive | 일기 보기</title>
     <link rel="stylesheet" href="saved_diary_style.css" />
-    <!-- ✅ 마크다운 렌더링용 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
     <div class="diary-container">
-        <!-- 헤더 -->
         <header class="diary-header">
             <h1>오늘의 기록 📖</h1>
             <p>기억을 담는 하루, Memory Archive</p>
         </header>
-        <!-- 메타 -->
+
         <section class="diary-meta">
             <div class="meta-row">
                 <span class="meta-label">날짜:</span>
@@ -32,24 +30,26 @@
                 <span class="meta-value" id="metaWeather">—</span>
             </div>
         </section>
-        <!-- 본문 카드 -->
+
+        <section id="savedQuestionsSection" class="questions-card" style="display:none;">
+            <h3 class="questions-title">💭 내가 선택한 질문</h3>
+            <div id="savedQuestionsList" class="questions-list">
+                </div>
+        </section>
+
         <article class="entry-card">
             <h2 class="entry-title" id="entryTitle"></h2>
             <div class="entry-body" id="entryBody"></div>
-            <!-- 저장된 사진들 -->
             <div id="entrySavedPhotos" class="entry-photos"></div>
         </article>
 
-        <!-- 오늘의 한 줄 요약 -->
         <section class="summary-section">
             <h3>오늘의 한 줄 요약 ✨</h3>
             <p id="summaryText"></p>
         </section>
 
-        <!-- 작년 오늘의 나 보기 -->
         <section class="lastyear-section">
             <h3>작년 오늘의 나 보기 📅</h3>
-            <!-- 작년 일기 있을 때 -->
             <div class="lastyear-entry" id="lastyearEntry" style="display:none;">
                 <div class="lastyear-meta">
                     <span class="chip mood" id="lastyearMood"></span>
@@ -60,18 +60,15 @@
                 <p class="lastyear-body" id="lastyearBody"></p>
                 <a href="#" class="lastyear-link" id="lastyearLink">전체 보기 →</a>
             </div>
-            <!-- 작년 일기 없을 때 -->
             <div class="lastyear-empty" id="lastyearEmpty">
                 <div class="emoji">📭</div>
                 <p class="empty-text">작년 오늘의 기록이 없어요!</p>
                 <p class="empty-subtext">올해부터 차곡차곡 쌓아볼까요?</p>
             </div>
         </section>
-        <!-- 버튼 -->
+
         <div class="button-row">
-            <!-- 기존 뒤로가기 버튼-->
             <a class="btn" id="btnBack" href="index.html">← 뒤로가기</a>
-            <!-- 수정 버튼 추가 -->
             <button class="btn" id="btnEdit">✏️ 수정하기</button>
         </div>
     </div>
