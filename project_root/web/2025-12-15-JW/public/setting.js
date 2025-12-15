@@ -50,10 +50,6 @@ function setupEventListeners() {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('change', saveSettings);
-
-                if (id === 'countCustom') {
-                    checkCustomQuestionCount();
-                }
         }
     });
 
@@ -154,10 +150,10 @@ function saveSettings() {
     }
 
     /* 2. 사용자 질문 개수 > 0 인데 질문이 없음 */
-    if (customCount > customQuestions.length) {
-        errorBox.textContent = `설정한 개수(${customCount}개)보다 등록된 나만의 질문(${customQuestions.length}개)이 부족합니다. 질문을 더 추가해주세요.`;
+    if (customCount > 0 && customQuestions.length === 0) {
+        errorBox.textContent = '사용자 질문 개수를 설정하려면 먼저 사용자 정의 질문을 추가해주세요.';
         errorBox.style.display = 'block';
-        return false;
+        return false; // 실패 반환
     }
 
     /* 3. 질문 총합 불일치 검사 */
@@ -168,7 +164,7 @@ function saveSettings() {
         errorBox.style.display = 'block';
         return false; // 실패 반환
     }
-    
+
     /* 오류 없으면 오류 숨김 */
     errorBox.style.display = 'none';
 
@@ -187,21 +183,6 @@ function saveSettings() {
     return true; // 성공 반환
 }
 
-/* 4. 실시간 점검 함수*/
-    function checkCustomQuestionCount() {
-    const customCount = parseInt(document.getElementById('countCustom').value, 10);
-    const currentLen = customQuestions.length;
-    const errorBox = document.getElementById('questionCountError');
-
-    // 설정한 개수보다 등록된 질문이 적으면 에러 메시지 표시
-    if (customCount > currentLen) {
-        errorBox.textContent = `설정한 개수(${customCount}개)보다 등록된 질문(${currentLen}개)이 부족합니다. 더 추가해주세요.`;
-        errorBox.style.display = 'block';
-    } else {
-        // 충족하면 에러 메시지 숨김
-        errorBox.style.display = 'none';
-    }
-}
 
 // 저장 완료 뱃지
 function showSavedBadge() {
@@ -225,8 +206,10 @@ function addCustomQuestion() {
     input.value = '';
     renderCustomQuestions();
 
-    // 무조건 숨기지 않고, 개수가 충족되었는지 확인
-    saveSettings();
+    const errorBox = document.getElementById('questionCountError');
+    if (errorBox) {
+        errorBox.style.display = 'none';
+    }
 }
 
 // 사용자 정의 질문 삭제
@@ -235,8 +218,6 @@ function deleteCustomQuestion(index) {
     customQuestions.splice(index, 1);
     localStorage.setItem('ma_custom_questions', JSON.stringify(customQuestions));
     renderCustomQuestions();
-
-    saveSettings();
 }
 
 // 사용자 정의 질문 렌더링
