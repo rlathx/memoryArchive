@@ -25,7 +25,7 @@ body {
 
 .diary-header h1 {
     margin: 0 0 6px;
-    font-size: 24px;
+    font-size: 28px; /* 오늘의 기록 폰트 크기 */
     color: #7c3aed;
 }
 
@@ -136,7 +136,6 @@ textarea {
 /* 렌더링 영역 */
 .diary-rendered {
     display: none;
-    /* 기본은 마크다운 모드 */
     width: 100%;
     min-height: 260px;
     border: 1px solid #e5e7eb;
@@ -158,28 +157,12 @@ textarea {
     font-weight: 700;
 }
 
-.diary-rendered h1 {
-    font-size: 1.5rem;
-}
-
-.diary-rendered h2 {
-    font-size: 1.25rem;
-}
-
-.diary-rendered h3 {
-    font-size: 1.1rem;
-}
-
-.diary-rendered p {
-    margin: 0.2em 0 0.6em;
-}
-
+.diary-rendered h1 { font-size: 1.5rem; }
+.diary-rendered h2 { font-size: 1.25rem; }
+.diary-rendered h3 { font-size: 1.1rem; }
+.diary-rendered p { margin: 0.2em 0 0.6em; }
 .diary-rendered ul,
-.diary-rendered ol {
-    padding-left: 1.2rem;
-    margin: 0.2em 0 0.6em;
-}
-
+.diary-rendered ol { padding-left: 1.2rem; margin: 0.2em 0 0.6em; }
 .diary-rendered code {
     font-family: inherit;
     font-size: 0.95em;
@@ -187,7 +170,6 @@ textarea {
     padding: 2px 4px;
     border-radius: 4px;
 }
-
 .diary-rendered pre code {
     display: block;
     padding: 8px 10px;
@@ -338,34 +320,51 @@ textarea {
     background: #8b5cf6;
 }
 
-/* 초기화 버튼 */
-.btn-reset {
-    font-size: 12px;
-    font-weight: normal;
-    padding: 3px 10px;
-    margin-left: 10px;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    color: #64748b;
-    cursor: pointer;
-}
-
-.btn-reset:hover {
-    background: #e2e8f0;
-    color: #334155;
-}
-
 /* 이모지 부분 */
 .emoji-section {
     margin-top: 20px;
 }
 
-.emoji-section h3 {
-    margin: 16px 0 8px;
+/* ✅ [수정됨] 기분/날씨 섹션 제목 및 버튼 정렬 */
+.section-title {
     font-size: 16px;
-    color: #7c3aed;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+
+/* ✅ [수정됨] 기분/날씨 초기화 버튼 스타일 */
+.reset-btn-small {
+    /* 1. 레이아웃 및 크기 */
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;             /* 아이콘과 텍스트 사이 간격 */
+    padding: 5px 10px;    /* 안쪽 여백을 줘서 통통하게 만듦 */
+    margin-left: 8px;     /* 제목과의 간격 */
+    
+    /* 2. 폰트 설정 */
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;       /* 차분한 회색 텍스트 */
+    
+    /* 3. 테두리 및 배경 (알약 모양) */
+    background-color: #f1f5f9; /* 연한 회색 배경 */
+    border: 1px solid #e2e8f0; /* 연한 테두리 */
+    border-radius: 20px;       /* 둥근 모서리 (알약 모양) */
+    
+    cursor: pointer;
+    transition: all 0.2s ease; /* 부드러운 애니메이션 */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* 아주 연한 그림자 */
+}
+
+.reset-btn-small:hover {
+    color: #ef4444;
+    background-color: #fef2f2;
+}
+
 
 .emoji-list {
     font-size: 26px;
@@ -403,24 +402,38 @@ textarea {
     background: #f3e8ff;
 }
 
-/* 질문  */
+/* 질문 섹션 컨테이너 */
 .question-section {
-    background: #faf8ff;
-    border: 1px solid #e5e7eb;
+    margin: 0 0 12px 0;
+    background: #fdfcff;
+    border: 1px solid #e9d5ff;
     border-radius: 12px;
-    padding: 18px 20px;
-    margin: 16px auto 24px;
-    text-align: center;
-    max-width: 600px;
-    box-shadow: 0 2px 6px rgba(139, 92, 246, 0.06);
+    padding: 16px;
 }
 
+/* ✅ [수정됨] 질문 섹션 제목: 중앙 정렬 + 28px */
 .question-section h3 {
-    color: #8b5cf6;
+    margin: 0 0 10px 0;
+    
+    font-size: 22px;      /* 오늘의 기록과 동일한 크기 */
+    color: #7c3aed;       /* 브랜드 컬러 */
     font-weight: 700;
-    font-size: 18px;
-    margin-bottom: 14px;
-    letter-spacing: 0.4px;
+    
+    /* 레이아웃: 위(텍스트) - 아래(버튼) */
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    text-align: center;
+}
+
+/* ✅ [수정됨] 버튼 그룹: 다음 줄 오른쪽 정렬 */
+.question-btn-group {
+    width: 100%; 
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 끝 정렬 */
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px; 
 }
 
 #question-list {
@@ -446,14 +459,14 @@ textarea {
     max-width: 520px;
     line-height: 1.5;
     box-shadow: 0 2px 4px rgba(139, 92, 246, 0.06);
-    transition: all 0.2s ease; /* 애니메이션 부드럽게 */
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 8px;
     min-height: auto;
-    cursor: pointer; /* 클릭 가능함을 표시 */
+    cursor: pointer;
 }
 
 .question-item:hover {
@@ -462,31 +475,17 @@ textarea {
 }
 
 .question-item.selected {
-    border: 2px solid #7c3aed !important; /* 진한 보라색 테두리 (강제 적용) */
-    background-color: #f5f3ff;            /* 연한 보라색 배경 */
-    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1); /* 외곽 광채 효과 */
-    transform: scale(1.02);               /* 살짝 커짐 */
-    font-weight: 600;                     /* 글씨 조금 더 진하게 */
+    border: 2px solid #7c3aed !important;
+    background-color: #f5f3ff;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    transform: scale(1.02);
+    font-weight: 600;
 }
 
 /* 카테고리별 색상 */
-/* MBTI 질문 = 하늘색 */
-.question-item.question-mbti {
-    border-color: #38bdf8;
-    /* 하늘색 */
-}
-
-/* 기분 질문 전체 = 핑크색 */
-.question-item.question-basic {
-    border-color: #f9a8d4;
-    /* 핑크색 */
-}
-
-/* 사용자 질문 = 좀 더 차분한 연두/민트색 */
-.question-item.question-custom {
-    border-color: #34d399;
-    /* 차분한 민트 */
-}
+.question-item.question-mbti { border-color: #38bdf8; }
+.question-item.question-basic { border-color: #f9a8d4; }
+.question-item.question-custom { border-color: #34d399; }
 
 /* 텍스트 span */
 .question-item .q-text {
@@ -496,59 +495,81 @@ textarea {
 
 /* 질문 종류 뱃지 공통 스타일 */
 .q-badge {
-    position: static;           /* 둥둥 띄우기(absolute) 해제 -> 글자와 같은 줄에 배치 */
-    flex-shrink: 0;             /* 화면이 좁아져도 뱃지가 찌그러지지 않게 고정 */
-    
+    position: static;
+    flex-shrink: 0;
     font-size: 11px;
     font-weight: 700;
     padding: 4px 8px;
     border-radius: 8px;
     letter-spacing: -0.5px;
-    /* top, left 속성은 이제 필요 없음 */
 }
 
-/* MBTI 질문 뱃지 (하늘색 배경 + 진한 파랑 글씨) */
-.question-mbti .q-badge {
-    background-color: #e0f2fe;
-    color: #0284c7;
-}
+/* 뱃지 색상 */
+.question-mbti .q-badge { background-color: #e0f2fe; color: #0284c7; }
+.question-basic .q-badge { background-color: #fce7f3; color: #db2777; }
+.question-custom .q-badge { background-color: #dcfce7; color: #16a34a; }
 
-/* 기본 질문 뱃지 (연한 핑크 배경 + 진한 핑크 글씨) */
-.question-basic .q-badge {
-    background-color: #fce7f3;
-    color: #db2777;
-}
-
-/* 사용자 질문 뱃지 (연한 초록 배경 + 진한 초록 글씨) */
-.question-custom .q-badge {
-    background-color: #dcfce7;
-    color: #16a34a;
-}
-
-/*  질문 텍스트: 중앙 정렬 */
+/* 질문 텍스트: 중앙 정렬 */
 .question-item .q-text {
-    text-align: center;           /* 뱃지 옆에서 자연스럽게 읽히도록 */
+    text-align: center;
     line-height: 1.4;
-    word-break: keep-all;       /* 단어 단위 줄바꿈 */
+    word-break: keep-all;
     margin: 0;
 }
 
-/* ✅ 질문이 없을 때 표시할 안내 문구 스타일 */
+/* 질문 없을 때 메시지 */
 .question-empty-msg {
     text-align: center;
-    color: #6b7280;          /* 회색 텍스트 */
+    color: #6b7280;
     font-size: 14px;
     background-color: #f9fafb;
-    border: 1px dashed #d1d5db; /* 점선 테두리 */
+    border: 1px dashed #d1d5db;
     border-radius: 10px;
     padding: 20px;
-    list-style: none;        /* 리스트 점 제거 */
-    width: 90%;              /* 너비 맞춤 */
+    list-style: none;
+    width: 90%;
 }
 
 .question-guide-text {
-    margin: -5px 0 15px 0; /* 제목과 간격 조절 */
+    margin: -5px 0 15px 0;
     font-size: 14px;
-    color: #6b7280; /* 회색 텍스트 */
+    color: #6b7280;
     font-weight: 400;
+    text-align: center;
+}
+
+/* 새로고침 버튼 (기존) */
+.btn-reset {
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: #8b5cf6;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: #f3e8ff;
+}
+.btn-reset:hover {
+    background-color: #e9d5ff;
+}
+
+/* 처음 질문 받기 버튼 */
+.btn-restore {
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: #059669;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: #d1fae5;
+}
+.btn-restore:hover {
+    background-color: #a7f3d0;
 }

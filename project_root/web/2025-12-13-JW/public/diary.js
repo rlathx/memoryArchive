@@ -47,27 +47,36 @@ function getTwoWeekAnalysisQuestion() {
     return null;
 }
 
-// 선택한 질문의 순서를 기억할 전역 배열
+// 전역 변수
 let selectedQuestionOrder = [];
-
+let isUnsaved = false;
 let dateStr = '';
 let diaryViewMode = 'markdown';
 let diaryPhotos = [];
 
+// 복구용 데이터
+let originalSavedSelected = null;
+let originalSavedPool = null;
+
+function markAsUnsaved() {
+    isUnsaved = true;
+}
+
 // 페이지 로드 시 초기화
 window.onload = () => {
-    // 날짜 세팅
     const params = new URLSearchParams(location.search);
     dateStr = params.get('date') || getTodayDate();
     document.getElementById('dateText').textContent = dateStr;
 
-    // 저장된 일기 로드
     loadSavedDiary(dateStr);
+    loadTodayQuestion(); 
 
-    // 초기 질문 로드
-    loadTodayQuestion();
+    const titleInput = document.getElementById('diaryTitle');
+    const noteInput = document.getElementById('note');
+    if (titleInput) titleInput.addEventListener('input', markAsUnsaved);
+    if (noteInput) noteInput.addEventListener('input', markAsUnsaved);
 
-    // 새로고침 버튼 이벤트
+    // 새로고침 버튼
     const btnRefresh = document.getElementById('btnRefreshQuestions');
     if (btnRefresh) {
         btnRefresh.addEventListener('click', () => {
@@ -76,12 +85,23 @@ window.onload = () => {
                 icon.classList.add('spin-anim');
                 setTimeout(() => icon.classList.remove('spin-anim'), 500);
             }
-            // 강제로 랜덤 질문 생성 (true 파라미터 전달)
-            loadTodayQuestion(true);
+            loadTodayQuestion(true); // 랜덤 생성
+            markAsUnsaved();
         });
     }
 
-    // 이모지(기분) 클릭
+    // '처음 질문 받기' 버튼
+    const btnRestore = document.getElementById('btnRestoreOriginal');
+    if (btnRestore) {
+        btnRestore.addEventListener('click', () => {
+            if (originalSavedSelected || originalSavedPool) {
+                restoreOriginalQuestions();
+                markAsUnsaved();
+            }
+        });
+    }
+
+    // 이모지(기분)
     document.getElementById('moodList').addEventListener('click', (e) => {
         const emoEl = e.target.closest('.emoji-item:not(.emoji-photo-label)');
         if (!emoEl) return;
@@ -91,9 +111,10 @@ window.onload = () => {
         updateEmojiSelection('moodList', emo);
         document.getElementById('moodPhotoPreview').style.display = 'none';
         localStorage.removeItem(`ma_mood_photo_${dateStr}`);
+        markAsUnsaved();
     });
 
-    // 이모지(날씨) 클릭
+    // 이모지(날씨)
     document.getElementById('weatherList').addEventListener('click', (e) => {
         const emoEl = e.target.closest('.emoji-item');
         if (!emoEl) return;
@@ -101,9 +122,10 @@ window.onload = () => {
         document.getElementById('weatherNow').textContent = emo;
         localStorage.setItem(`ma_weather_${dateStr}`, emo);
         updateEmojiSelection('weatherList', emo);
+        markAsUnsaved();
     });
 
-    // 기분 사진 업로드
+    // 기분 사진
     const moodPhotoInput = document.getElementById('moodPhotoInput');
     if (moodPhotoInput) {
         moodPhotoInput.addEventListener('change', (e) => {
@@ -117,23 +139,23 @@ window.onload = () => {
                     document.getElementById('moodNow').textContent = '📷';
                     localStorage.removeItem(`ma_mood_${dateStr}`);
                     updateEmojiSelection('moodList', null);
+                    markAsUnsaved();
                 };
                 reader.readAsDataURL(file);
             }
         });
     }
-
-    // 기분 사진 제거
     const btnRemoveMoodPhoto = document.getElementById('btnRemoveMoodPhoto');
     if (btnRemoveMoodPhoto) {
         btnRemoveMoodPhoto.addEventListener('click', () => {
             document.getElementById('moodPhotoPreview').style.display = 'none';
             localStorage.removeItem(`ma_mood_photo_${dateStr}`);
             document.getElementById('moodNow').textContent = '—';
+            markAsUnsaved();
         });
     }
 
-    // 일기 사진 업로드
+    // 일기 사진
     const notePhotoInput = document.getElementById('notePhotoInput');
     if (notePhotoInput) {
         notePhotoInput.addEventListener('change', (e) => {
@@ -144,40 +166,45 @@ window.onload = () => {
                     const imageData = event.target.result;
                     diaryPhotos.push(imageData);
                     addNotePhotoPreview(imageData);
+                    markAsUnsaved();
                 };
                 reader.readAsDataURL(file);
             }
         });
     }
 
-    // 저장 버튼
     document.getElementById('btnSave').addEventListener('click', () => saveDiary(dateStr));
 
-    // 뒤로가기 버튼
+    // 뒤로가기
     document.getElementById('btnBack').addEventListener('click', (e) => {
         e.preventDefault();
-        window.location.assign('index.html');
+        if (isUnsaved) {
+            const confirmSave = confirm('변경사항이 저장되지 않았습니다!\n변경사항을 저장하겠습니까?');
+            if (confirmSave) saveDiary(dateStr);
+        } else {
+            window.location.assign('index.html');
+        }
     });
 
-    // 기분 초기화
+    // 리셋 버튼들
     document.getElementById('btnResetMood').addEventListener('click', () => {
         document.getElementById('moodNow').textContent = '—';
         localStorage.removeItem(`ma_mood_${dateStr}`);
         localStorage.removeItem(`ma_mood_photo_${dateStr}`);
         document.getElementById('moodPhotoPreview').style.display = 'none';
         updateEmojiSelection('moodList', null);
+        markAsUnsaved();
     });
 
-    // 날씨 초기화
     document.getElementById('btnResetWeather').addEventListener('click', () => {
         document.getElementById('weatherNow').textContent = '—';
         localStorage.removeItem(`ma_weather_${dateStr}`);
         updateEmojiSelection('weatherList', null);
+        markAsUnsaved();
     });
 
-    // 마크다운 뷰 모드 설정
+    // 뷰 모드
     const noteTextarea = document.getElementById('note');
-    const noteRendered = document.getElementById('noteRendered');
     const btnMd = document.getElementById('btnMarkdownView');
     const btnRender = document.getElementById('btnRenderedView');
 
@@ -196,81 +223,63 @@ window.onload = () => {
 
 // ---------------- 함수 정의 ----------------
 
-// ✅ [수정됨] 질문 로드 함수
 function loadTodayQuestion(forceNewRandom = false) {
     const listEl = document.getElementById('question-list');
     const sectionEl = document.querySelector('.question-section');
+    const btnRestore = document.getElementById('btnRestoreOriginal');
     if (!listEl) return;
 
-    const savedQsJSON = localStorage.getItem(`ma_questions_${dateStr}`);
+    // 저장된 데이터 로드
+    const savedSelectedJSON = localStorage.getItem(`ma_questions_${dateStr}`);
+    const savedPoolJSON = localStorage.getItem(`ma_question_pool_${dateStr}`);
     const hasDiary = localStorage.getItem(`ma_has_diary_${dateStr}`);
 
     // [CASE 1] 이미 저장된 일기가 있고, 새로고침이 아닐 때
     if (!forceNewRandom && hasDiary) {
-        if (savedQsJSON) {
+        if (savedSelectedJSON) {
             try {
-                const savedQuestions = JSON.parse(savedQsJSON);
-                if (savedQuestions && savedQuestions.length > 0) {
-                    if (sectionEl) sectionEl.style.display = 'block';
-                    
-                    // 순서 배열 초기화
-                    selectedQuestionOrder = [...savedQuestions];
-
-                    // 설정 로드
-                    const settings = JSON.parse(localStorage.getItem('ma_settings')) || {};
-                    const mbti = settings.selectedMBTI;
-                    const mbtiQuestionsArr = mbtiQuestions[mbti] || [];
-                    const customQuestionsArr = JSON.parse(localStorage.getItem('ma_custom_questions')) || [];
-
-                    listEl.innerHTML = savedQuestions.map(q => {
-                        let category = 'basic';
-                        
-                        // 카테고리 판별 로직
-                        if (mbtiQuestionsArr.includes(q)) {
-                            category = 'mbti';
-                        } else if (customQuestionsArr.includes(q)) {
-                            category = 'custom';
-                        } else if (!defaultQuestions.includes(q)) {
-                            category = 'custom';
-                        }
-
-                        return `
-                            <li class="question-item selected question-${category}">
-                                <span class="q-badge">저장된 질문</span>
-                                <span class="q-text">${q}</span>
-                            </li>
-                        `;
-                    }).join('');
-                    
-                    attachClickEvents(listEl);
-                    return;
+                const savedSelected = JSON.parse(savedSelectedJSON);
+                
+                // 1. 전체 풀(Pool) 백업 (화면엔 안 뿌림)
+                if (savedPoolJSON) {
+                    originalSavedPool = JSON.parse(savedPoolJSON);
+                } else {
+                    originalSavedPool = null;
                 }
+
+                // 2. 선택된 질문 백업
+                originalSavedSelected = [...savedSelected];
+
+                // 버튼 표시
+                if (btnRestore) btnRestore.style.display = 'inline-block';
+                if (sectionEl) sectionEl.style.display = 'block';
+                
+                // 현재 선택 상태 초기화
+                selectedQuestionOrder = [...savedSelected];
+                
+                // ✅ [핵심 수정] 초기 로드 시에는 '선택된 질문'만 보여줌
+                renderQuestionList(listEl, savedSelected, selectedQuestionOrder);
+                return;
+
             } catch(e) { console.error(e); }
         }
     }
 
-    // [CASE 2] 랜덤 질문 생성
+    // [CASE 2] 랜덤 질문 생성 (일기가 없거나, 새로고침 시)
     const settings = JSON.parse(localStorage.getItem('ma_settings')) || {};
     const mbti = settings.selectedMBTI;
 
-    // 1. 설정된 개수
     const mbtiCount = (settings.mbtiCount !== undefined) ? parseInt(settings.mbtiCount) : 0;
     const basicCount = (settings.basicCount !== undefined) ? parseInt(settings.basicCount) : 3;
     const customCount = (settings.customCount !== undefined) ? parseInt(settings.customCount) : 0;
 
-    // 2. 현재 선택된 질문 유지 (새로고침 시)
     let preserved = { mbti: [], basic: [], custom: [] };
     let allPreservedTexts = [];
 
-    // forceNewRandom일 때만 유지 로직 동작
     if (forceNewRandom) {
-        // 이미 저장된 순서(selectedQuestionOrder)가 있다면 그것을 우선시해야 하지만,
-        // 현재 화면(DOM)에 표시된 순서를 기준으로 유지 리스트를 만듭니다.
-        // 수정 모드 진입 직후에는 DOM 순서가 selectedQuestionOrder와 같습니다.
         listEl.querySelectorAll('.question-item.selected').forEach(item => {
             const text = item.querySelector('.q-text').textContent;
             allPreservedTexts.push(text);
-
             if (item.classList.contains('question-mbti')) preserved.mbti.push(text);
             else if (item.classList.contains('question-custom')) preserved.custom.push(text);
             else preserved.basic.push(text);
@@ -279,50 +288,34 @@ function loadTodayQuestion(forceNewRandom = false) {
         selectedQuestionOrder = [];
     }
 
-    // 3. 각 소스별 질문 배열 준비
     const mbtiQuestionsArr = mbtiQuestions[mbti] || [];
     const customQuestionsArr = JSON.parse(localStorage.getItem('ma_custom_questions')) || [];
-    const defaultQuestionsArr = defaultQuestions;
-
-    // 4. 부족한 개수만큼 새로 뽑기
+    
+    // 부족한 개수 계산
     const needMbti = Math.max(0, mbtiCount - preserved.mbti.length);
     const needCustom = Math.max(0, customCount - preserved.custom.length);
     const needBasic = Math.max(0, basicCount - preserved.basic.length);
 
-    // 풀에서 이미 선택된 질문 제외
     const poolMbti = mbtiQuestionsArr.filter(q => !preserved.mbti.includes(q));
     const poolCustom = customQuestionsArr.filter(q => !preserved.custom.includes(q));
     
-    let poolBasic = defaultQuestionsArr.filter(q => !preserved.basic.includes(q));
+    let poolBasic = defaultQuestions.filter(q => !preserved.basic.includes(q));
     let newBasicSet = [];
     
-    // 2주 분석 질문
     const twoWeekQ = getTwoWeekAnalysisQuestion();
-    let twoWeekUsed = false;
-
-    if (twoWeekQ && allPreservedTexts.includes(twoWeekQ)) {
-        twoWeekUsed = true;
-    }
-
-    if (needBasic > 0 && twoWeekQ && !twoWeekUsed && !poolBasic.includes(twoWeekQ)) { 
-         if (!allPreservedTexts.includes(twoWeekQ)) {
-             newBasicSet.push(twoWeekQ);
-             poolBasic = poolBasic.filter(q => q !== twoWeekQ);
-         }
+    if (needBasic > 0 && twoWeekQ && !allPreservedTexts.includes(twoWeekQ) && !poolBasic.includes(twoWeekQ)) { 
+         newBasicSet.push(twoWeekQ);
+         poolBasic = poolBasic.filter(q => q !== twoWeekQ);
     }
 
     const remainingBasicNeed = Math.max(0, needBasic - newBasicSet.length);
     const randomBasics = pickRandom(poolBasic, remainingBasicNeed);
     newBasicSet = [...newBasicSet, ...randomBasics];
 
-    // 5. 최종 조합: 새로 뽑은 질문들
     const newMbti = pickRandom(poolMbti, needMbti);
     const newCustom = pickRandom(poolCustom, needCustom);
     const newBasic = newBasicSet;
 
-    // ✅ [핵심 수정] 선택된 질문(순서 유지) + 새로 뽑은 질문(뒤에 추가)
-    // 기존에는 카테고리별로 다시 묶어서 정렬했기 때문에 순서가 섞였음.
-    // 여기서는 allPreservedTexts(선택된 질문들)을 맨 앞에 그대로 둠.
     let finalQuestions = [
         ...allPreservedTexts,
         ...newMbti,
@@ -330,33 +323,73 @@ function loadTodayQuestion(forceNewRandom = false) {
         ...newCustom
     ];
 
-    // 6. 렌더링
     if (finalQuestions.length === 0) {
         if (sectionEl) sectionEl.style.display = 'block';
-        listEl.innerHTML = `
-            <li class="question-empty-msg">
-                질문을 추가하시면 일기 작성에 도움이 될 수 있어요! ✨
-            </li>
-        `;
+        listEl.innerHTML = `<li class="question-empty-msg">질문을 추가하시면 일기 작성에 도움이 될 수 있어요! ✨</li>`;
         return;
     }
 
     if (sectionEl) sectionEl.style.display = 'block';
+    
+    if (forceNewRandom) {
+        selectedQuestionOrder = [...allPreservedTexts];
+    }
 
-    listEl.innerHTML = finalQuestions.map(q => {
-        let category = 'basic'; 
-        let label = '기본 질문';
+    renderQuestionList(listEl, finalQuestions, selectedQuestionOrder);
+}
+
+// ✅ [복구 버튼] 누르면 '전체 Pool'을 보여줌
+function restoreOriginalQuestions() {
+    const listEl = document.getElementById('question-list');
+    if (!listEl) return;
+
+    let poolToRender = [];
+    let selectedToMark = [];
+
+    // Pool이 있으면 전체 목록 복구
+    if (originalSavedPool && originalSavedPool.length > 0) {
+        poolToRender = [...originalSavedPool];
+    } else if (originalSavedSelected) {
+        // Pool 데이터가 없는 옛날 일기라면 선택된 것만이라도 보여줌
+        poolToRender = [...originalSavedSelected];
+    }
+
+    if (originalSavedSelected) {
+        selectedToMark = [...originalSavedSelected];
+    }
+
+    // 전역 상태(선택 순서) 복구
+    selectedQuestionOrder = [...selectedToMark];
+    
+    // 렌더링
+    renderQuestionList(listEl, poolToRender, selectedToMark);
+}
+
+// 질문 리스트 렌더링 함수
+function renderQuestionList(listEl, pool, selectedList) {
+    const settings = JSON.parse(localStorage.getItem('ma_settings')) || {};
+    const mbti = settings.selectedMBTI;
+    const mbtiQuestionsArr = mbtiQuestions[mbti] || [];
+    const customQuestionsArr = JSON.parse(localStorage.getItem('ma_custom_questions')) || [];
+
+    listEl.innerHTML = pool.map(q => {
+        let category = 'basic';
         
         // 카테고리 판별
-        if (mbtiQuestionsArr.includes(q)) { category = 'mbti'; label = 'MBTI 질문'; }
-        else if (customQuestionsArr.includes(q)) { category = 'custom'; label = '나만의 질문'; }
-        else if (!defaultQuestions.includes(q)) { category = 'custom'; label = '나만의 질문'; }
-        
-        const isSelected = allPreservedTexts.includes(q) ? 'selected' : '';
+        if (mbtiQuestionsArr.includes(q)) {
+            category = 'mbti';
+        } else if (customQuestionsArr.includes(q)) {
+            category = 'custom';
+        } else if (!defaultQuestions.includes(q)) {
+            category = 'custom';
+        }
+
+        // 선택 여부 확인
+        const isSelected = selectedList.includes(q) ? 'selected' : '';
 
         return `
-            <li class="question-item question-${category} ${isSelected}">
-                <span class="q-badge">${label}</span>
+            <li class="question-item ${isSelected} question-${category}">
+                <span class="q-badge">저장된 질문</span>
                 <span class="q-text">${q}</span>
             </li>
         `;
@@ -365,7 +398,6 @@ function loadTodayQuestion(forceNewRandom = false) {
     attachClickEvents(listEl);
 }
 
-// 클릭 이벤트 연결 함수
 function attachClickEvents(listEl) {
     const items = listEl.querySelectorAll('.question-item');
     items.forEach(item => {
@@ -377,12 +409,15 @@ function attachClickEvents(listEl) {
             item.classList.toggle('selected');
 
             if (item.classList.contains('selected')) {
+                // 선택: 배열 끝에 추가 (순서 기록)
                 if (!selectedQuestionOrder.includes(text)) {
                     selectedQuestionOrder.push(text);
                 }
             } else {
+                // 해제: 배열에서 제거
                 selectedQuestionOrder = selectedQuestionOrder.filter(q => q !== text);
             }
+            markAsUnsaved();
         });
     });
 }
@@ -397,39 +432,33 @@ function pickRandom(arr, count) {
 function loadSavedDiary(dateStr) {
     const savedTitle = localStorage.getItem(`ma_title_${dateStr}`);
     if (savedTitle) document.getElementById('diaryTitle').value = savedTitle;
-
     const savedNote = localStorage.getItem(`ma_note_${dateStr}`);
     if (savedNote) document.getElementById('note').value = savedNote;
-
     const savedMood = localStorage.getItem(`ma_mood_${dateStr}`);
     if (savedMood) {
         document.getElementById('moodNow').textContent = savedMood;
         updateEmojiSelection('moodList', savedMood);
     }
-
     const savedMoodPhoto = localStorage.getItem(`ma_mood_photo_${dateStr}`);
     if (savedMoodPhoto) {
         displayMoodPhoto(savedMoodPhoto);
         document.getElementById('moodNow').textContent = '📷';
         updateEmojiSelection('moodList', null);
     }
-
     const savedWeather = localStorage.getItem(`ma_weather_${dateStr}`);
     if (savedWeather) {
         document.getElementById('weatherNow').textContent = savedWeather;
         updateEmojiSelection('weatherList', savedWeather);
     }
-
     const savedPhotos = localStorage.getItem(`ma_note_photos_${dateStr}`);
     if (savedPhotos) {
         try {
             diaryPhotos = JSON.parse(savedPhotos);
-            diaryPhotos.forEach(photo => addNotePhotoPreview(photo));
+            diaryPhotos.forEach(photo => addNotePhotoPreview(photo, false));
         } catch (e) { console.error(e); }
     }
 }
 
-// 일기 저장 함수
 function saveDiary(dateStr) {
     const title = document.getElementById('diaryTitle').value.trim();
     const content = document.getElementById('note').value.trim();
@@ -443,14 +472,24 @@ function saveDiary(dateStr) {
     if (diaryPhotos.length > 0) localStorage.setItem(`ma_note_photos_${dateStr}`, JSON.stringify(diaryPhotos));
     else localStorage.removeItem(`ma_note_photos_${dateStr}`);
 
-    // 화면 순서가 아닌, 클릭한 순서(selectedQuestionOrder)대로 저장
+    // 1. 선택된 질문 저장 (Selected)
     if (selectedQuestionOrder.length > 0) {
         localStorage.setItem(`ma_questions_${dateStr}`, JSON.stringify(selectedQuestionOrder));
     } else {
         localStorage.removeItem(`ma_questions_${dateStr}`);
     }
 
-    // 일기 존재 여부 플래그 업데이트
+    // 2. 현재 화면에 떠 있는 모든 질문 저장 (Pool)
+    const listEl = document.getElementById('question-list');
+    if (listEl) {
+        const allQuestions = Array.from(listEl.querySelectorAll('.q-text')).map(el => el.textContent);
+        if (allQuestions.length > 0) {
+            localStorage.setItem(`ma_question_pool_${dateStr}`, JSON.stringify(allQuestions));
+        } else {
+            localStorage.removeItem(`ma_question_pool_${dateStr}`);
+        }
+    }
+
     const hasDiary =
         !!title ||
         !!content ||
@@ -465,7 +504,7 @@ function saveDiary(dateStr) {
     } else {
         localStorage.removeItem(`ma_has_diary_${dateStr}`);
     }
-
+    isUnsaved = false;
     alert('일기가 저장되었습니다! 📝');
     window.location.href = 'index.html';
 }
@@ -492,7 +531,7 @@ function displayMoodPhoto(imageData) {
     preview.style.display = 'block';
 }
 
-function addNotePhotoPreview(imageData) {
+function addNotePhotoPreview(imageData, markChange = true) {
     const previewContainer = document.getElementById('notePhotoPreview');
     const photoItem = document.createElement('div');
     photoItem.className = 'note-photo-item';
@@ -505,6 +544,7 @@ function addNotePhotoPreview(imageData) {
     removeBtn.addEventListener('click', () => {
         photoItem.remove();
         diaryPhotos = diaryPhotos.filter(p => p !== imageData);
+        markAsUnsaved();
     });
     photoItem.appendChild(img);
     photoItem.appendChild(removeBtn);
