@@ -97,6 +97,7 @@ window.onload = () => {
             if (originalSavedSelected || originalSavedPool) {
                 restoreOriginalQuestions();
                 markAsUnsaved();
+                alert('저장된 질문 상태로 복구되었습니다! 🕰️');
             }
         });
     }
@@ -240,24 +241,20 @@ function loadTodayQuestion(forceNewRandom = false) {
             try {
                 const savedSelected = JSON.parse(savedSelectedJSON);
                 
-                // 1. 전체 풀(Pool) 백업 (화면엔 안 뿌림)
                 if (savedPoolJSON) {
                     originalSavedPool = JSON.parse(savedPoolJSON);
                 } else {
                     originalSavedPool = null;
                 }
 
-                // 2. 선택된 질문 백업
                 originalSavedSelected = [...savedSelected];
 
-                // 버튼 표시
                 if (btnRestore) btnRestore.style.display = 'inline-block';
                 if (sectionEl) sectionEl.style.display = 'block';
                 
-                // 현재 선택 상태 초기화
                 selectedQuestionOrder = [...savedSelected];
                 
-                // ✅ [핵심 수정] 초기 로드 시에는 '선택된 질문'만 보여줌
+                // ✅ 초기 로드: 선택된 질문만 렌더링
                 renderQuestionList(listEl, savedSelected, selectedQuestionOrder);
                 return;
 
@@ -265,7 +262,7 @@ function loadTodayQuestion(forceNewRandom = false) {
         }
     }
 
-    // [CASE 2] 랜덤 질문 생성 (일기가 없거나, 새로고침 시)
+    // [CASE 2] 랜덤 질문 생성
     const settings = JSON.parse(localStorage.getItem('ma_settings')) || {};
     const mbti = settings.selectedMBTI;
 
@@ -338,7 +335,7 @@ function loadTodayQuestion(forceNewRandom = false) {
     renderQuestionList(listEl, finalQuestions, selectedQuestionOrder);
 }
 
-// ✅ [복구 버튼] 누르면 '전체 Pool'을 보여줌
+// 복구 함수
 function restoreOriginalQuestions() {
     const listEl = document.getElementById('question-list');
     if (!listEl) return;
@@ -346,11 +343,9 @@ function restoreOriginalQuestions() {
     let poolToRender = [];
     let selectedToMark = [];
 
-    // Pool이 있으면 전체 목록 복구
     if (originalSavedPool && originalSavedPool.length > 0) {
         poolToRender = [...originalSavedPool];
     } else if (originalSavedSelected) {
-        // Pool 데이터가 없는 옛날 일기라면 선택된 것만이라도 보여줌
         poolToRender = [...originalSavedSelected];
     }
 
@@ -358,14 +353,11 @@ function restoreOriginalQuestions() {
         selectedToMark = [...originalSavedSelected];
     }
 
-    // 전역 상태(선택 순서) 복구
     selectedQuestionOrder = [...selectedToMark];
-    
-    // 렌더링
     renderQuestionList(listEl, poolToRender, selectedToMark);
 }
 
-// 질문 리스트 렌더링 함수
+// ✅ [핵심 수정] 렌더링 시 질문의 원본 카테고리 표시
 function renderQuestionList(listEl, pool, selectedList) {
     const settings = JSON.parse(localStorage.getItem('ma_settings')) || {};
     const mbti = settings.selectedMBTI;
@@ -374,22 +366,26 @@ function renderQuestionList(listEl, pool, selectedList) {
 
     listEl.innerHTML = pool.map(q => {
         let category = 'basic';
-        
-        // 카테고리 판별
+        let label = '기본 질문';
+
+        // 카테고리 판별 및 라벨 설정
         if (mbtiQuestionsArr.includes(q)) {
             category = 'mbti';
+            label = 'MBTI 질문';
         } else if (customQuestionsArr.includes(q)) {
             category = 'custom';
+            label = '나만의 질문';
         } else if (!defaultQuestions.includes(q)) {
             category = 'custom';
+            label = '나만의 질문';
         }
 
-        // 선택 여부 확인
         const isSelected = selectedList.includes(q) ? 'selected' : '';
 
+        // 작성 페이지에서는 '저장된 질문' 대신 실제 카테고리를 보여줌
         return `
             <li class="question-item ${isSelected} question-${category}">
-                <span class="q-badge">저장된 질문</span>
+                <span class="q-badge">${label}</span>
                 <span class="q-text">${q}</span>
             </li>
         `;
@@ -409,12 +405,10 @@ function attachClickEvents(listEl) {
             item.classList.toggle('selected');
 
             if (item.classList.contains('selected')) {
-                // 선택: 배열 끝에 추가 (순서 기록)
                 if (!selectedQuestionOrder.includes(text)) {
                     selectedQuestionOrder.push(text);
                 }
             } else {
-                // 해제: 배열에서 제거
                 selectedQuestionOrder = selectedQuestionOrder.filter(q => q !== text);
             }
             markAsUnsaved();
@@ -472,14 +466,12 @@ function saveDiary(dateStr) {
     if (diaryPhotos.length > 0) localStorage.setItem(`ma_note_photos_${dateStr}`, JSON.stringify(diaryPhotos));
     else localStorage.removeItem(`ma_note_photos_${dateStr}`);
 
-    // 1. 선택된 질문 저장 (Selected)
     if (selectedQuestionOrder.length > 0) {
         localStorage.setItem(`ma_questions_${dateStr}`, JSON.stringify(selectedQuestionOrder));
     } else {
         localStorage.removeItem(`ma_questions_${dateStr}`);
     }
 
-    // 2. 현재 화면에 떠 있는 모든 질문 저장 (Pool)
     const listEl = document.getElementById('question-list');
     if (listEl) {
         const allQuestions = Array.from(listEl.querySelectorAll('.q-text')).map(el => el.textContent);
